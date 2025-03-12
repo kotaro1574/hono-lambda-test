@@ -7,7 +7,7 @@ const app = new Hono();
 // VAPIDキーの設定
 setVapidDetails(
   "mailto:shake1574@gmail.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 );
 
