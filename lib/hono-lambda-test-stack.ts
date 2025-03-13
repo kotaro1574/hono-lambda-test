@@ -1,8 +1,9 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
+import * as httpApi from "aws-cdk-lib/aws-apigatewayv2";
+import * as httpIntegrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { Construct } from "constructs";
 
 export class HonoLambdaTestStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -12,12 +13,35 @@ export class HonoLambdaTestStack extends cdk.Stack {
       entry: "lambda/index.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_20_X,
+      environment: {
+        VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || "",
+        VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || "",
+      },
     });
+
     fn.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
     });
-    new apigw.LambdaRestApi(this, "myapi", {
-      handler: fn,
+
+    const integration = new httpIntegrations.HttpLambdaIntegration(
+      "LambdaIntegration",
+      fn
+    );
+
+    const httpApiGateway = new httpApi.HttpApi(this, "HttpApi", {
+      apiName: "hono-http-api",
+      description: "HTTP API for Hono application",
+    });
+
+    httpApiGateway.addRoutes({
+      path: "/{proxy+}",
+      methods: [httpApi.HttpMethod.ANY],
+      integration: integration,
+    });
+
+    new cdk.CfnOutput(this, "HttpApiUrl", {
+      value: httpApiGateway.url || "",
+      description: "HTTP API URL",
     });
   }
 }
