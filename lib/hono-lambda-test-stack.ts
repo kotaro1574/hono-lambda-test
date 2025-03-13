@@ -4,6 +4,10 @@ import * as httpIntegrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
+import * as dotenv from "dotenv";
+
+// .envファイルを読み込む
+dotenv.config();
 
 export class HonoLambdaTestStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
